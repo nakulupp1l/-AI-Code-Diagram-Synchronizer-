@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code & Diagram Synchronizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: 'class' }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        .dark ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; }
+        .dark ::-webkit-scrollbar-thumb { background: #4b5563; }
+        #mermaid-container svg, #fullscreen-content svg { max-width: 100%; height: auto; margin: auto; }
+        .mermaid svg { background-color: transparent !important; }
+
+        /* Styling for Markdown content in chat */
+        .prose h1, .prose h2, .prose h3 { font-weight: 600; margin-top: 1em; margin-bottom: 0.5em; }
+        .prose ul { list-style-type: disc; margin-left: 1.5em; }
+        .prose strong { font-weight: 600; }
+        .prose code { 
+            background-color: #e5e7eb; padding: 0.2em 0.4em; 
+            border-radius: 0.25em; font-family: monospace;
+        }
+        .dark .prose code { background-color: #374151; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300 font-sans antialiased">
+    
+    <div class="container mx-auto p-4 lg:p-6">
+        <header class="text-center mb-6 relative">
+            <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white">Code & Diagram <span class="text-indigo-500 dark:text-indigo-400">Synchronizer</span></h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-2">AI-powered analysis and generation for developers.</p>
+            <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg text-sm p-2.5 absolute top-0 right-0">
+                <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm-.707 10.607a1 1 0 010-1.414l.707-.707a1 1 0 111.414 1.414l-.707.707a1 1 0 01-1.414 0zM3 11a1 1 0 100 2h1a1 1 0 100-2H3z"></path></svg>
+            </button>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[85vh]">
+            <div class="bg-white dark:bg-gray-800/50 rounded-xl shadow-lg flex flex-col p-4 border border-gray-200 dark:border-gray-700">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Diagram</h2>
+                    <div class="flex items-center space-x-2">
+                        <button id="btn-export-svg" title="Export as SVG" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg></button>
+                        <button id="btn-fullscreen" title="View Fullscreen" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 1v4m0 0h-4m4 0l-5-5"></path></svg></button>
+                    </div>
+                </div>
+                <div id="mermaid-container" class="flex-grow border border-gray-200 dark:border-gray-700 rounded-lg p-2 overflow-auto bg-gray-50 dark:bg-gray-900 flex items-start justify-center text-gray-400 dark:text-gray-500">
+                    <span>Your diagram will appear here</span>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-gray-800/50 rounded-xl shadow-lg flex flex-col p-4 border border-gray-200 dark:border-gray-700">
+                 <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Code</h2>
+                    <button id="btn-export-code" title="Download Code" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg></button>
+                 </div>
+                 <div id="code-display" class="flex-grow bg-gray-50 dark:bg-gray-900 text-sm p-3 rounded-lg border border-gray-200 dark:border-gray-700 overflow-auto font-mono">
+                    <span class="text-gray-400 dark:text-gray-500">Your code will appear here</span>
+                 </div>
+            </div>
+            <div class="bg-white dark:bg-gray-800/50 rounded-xl shadow-lg flex flex-col p-4 border border-gray-200 dark:border-gray-700">
+                <h2 class="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Controls & Q&A</h2>
+                <form id="main-form" class="space-y-4">
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">Upload Diagram</label>
+                        <div class="flex items-center space-x-2"><label for="diagram-upload" class="shrink-0 cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg text-sm">Choose File</label><span id="diagram-filename-display" class="text-sm text-gray-500 dark:text-gray-400 truncate">No file chosen</span><input type="file" id="diagram-upload" name="diagram_file" accept="image/*" class="hidden"></div>
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">Upload Code</label>
+                        <div class="flex items-center space-x-2"><label for="code-upload" class="shrink-0 cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg text-sm">Choose Files</label><span id="code-filename-display" class="text-sm text-gray-500 dark:text-gray-400 truncate">No file(s) chosen</span><input type="file" id="code-upload" name="code_files" multiple class="hidden"></div>
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">Ask a Question</label>
+                        <textarea id="query-input" name="query" rows="3" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500"></textarea>
+                    </div>
+                </form>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                    <button type="button" id="btn-generate-diagram" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-2.5 px-4 rounded-lg">Generate Diagram</button>
+                    <button type="button" id="btn-generate-code" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-2.5 px-4 rounded-lg">Generate Code</button>
+                </div>
+                <div class="flex space-x-3 mt-3">
+                    <button type="button" id="btn-ask-question" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-4 rounded-lg">Ask Question</button>
+                    <button type="button" id="btn-start-over" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-lg">Start Over</button>
+                </div>
+                <div id="spinner" class="hidden my-4 text-center text-gray-500 dark:text-gray-400">Processing...</div>
+                <div class="border-t border-gray-200 dark:border-gray-700 my-4"></div>
+                <div id="chat-history" class="flex-1 overflow-y-auto space-y-4"></div>
+            </div>
+        </main>
+    </div>
+
+    <div id="fullscreen-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 md:p-8">
+        <div id="fullscreen-content" class="w-full h-full p-4 bg-gray-50 dark:bg-gray-900 rounded-lg overflow-auto"></div>
+        <button id="btn-close-fullscreen" title="Close (Esc)" class="absolute top-4 right-4 text-white hover:text-indigo-400 text-4xl font-bold">&times;</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({ startOnLoad: true });</script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
