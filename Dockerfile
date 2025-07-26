@@ -15,14 +15,17 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # --- THIS IS THE FIX ---
 # Step 6: Explicitly clone the tree-sitter-python repository
-# This guarantees the source files are present for the build.
 RUN git clone https://github.com/tree-sitter/tree-sitter-python.git
 
-# Step 7: Copy the rest of your application code into the container
+# Step 7: Pre-build the tree-sitter library as the root user
+# This creates the 'build' directory with the correct permissions.
+RUN python -c "from tree_sitter import Language; Language.build_library('build/my-languages.so', ['tree-sitter-python'])"
+
+# Step 8: Copy the rest of your application code into the container
 COPY . .
 
-# Step 8: Expose the port the app runs on
+# Step 9: Expose the port the app runs on
 EXPOSE 5000
 
-# Step 9: Define the command to run your application
+# Step 10: Define the command to run your application
 CMD ["flask", "run", "--host=0.0.0.0"]
