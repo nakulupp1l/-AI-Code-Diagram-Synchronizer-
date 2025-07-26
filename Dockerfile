@@ -13,15 +13,16 @@ COPY requirements.txt .
 # Step 5: Install the Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# --- YEH NAYA AUR IMPORTANT STEP HAI ---
-# Step 6: tree-sitter-python repository ko સીધા download karein
+# --- THIS IS THE FIX ---
+# Step 6: Explicitly clone the tree-sitter-python repository
+# This guarantees the source files are present for the build.
 RUN git clone https://github.com/tree-sitter/tree-sitter-python.git
 
-# Step 7: Apne baaki application code ko copy karein
+# Step 7: Copy the rest of your application code into the container
 COPY . .
 
-# Step 8: Port ko expose karein
+# Step 8: Expose the port the app runs on
 EXPOSE 5000
 
-# Step 9: Application chalaane ke liye command define karein
+# Step 9: Define the command to run your application
 CMD ["flask", "run", "--host=0.0.0.0"]
